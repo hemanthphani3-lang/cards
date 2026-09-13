@@ -226,7 +226,7 @@
 
 /* Form Controls */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-group:last-child {
@@ -252,7 +252,7 @@
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   color: var(--text-main);
-  min-height: 48px;
+  min-height: 46px;
 }
 
 .form-input:focus {
@@ -266,6 +266,49 @@
   color: var(--text-muted);
   margin-top: 6px;
   line-height: 1.4;
+}
+
+/* Dynamic Players Input Rows in Modal */
+.dynamic-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.dynamic-player-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.dynamic-player-item .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-remove-player-input {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: #ef4444;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-surface);
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-remove-player-input:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
 }
 
 /* Toast Notifications */
