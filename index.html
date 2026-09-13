@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Scorekeeper — Digital Game Sheet</title>
+  <meta name="description" content="A premium, app-like card game scorekeeper with Google Sheets database persistence.">
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="./src/css/reset.css">
+  <link rel="stylesheet" href="./src/css/variables.css">
+  <link rel="stylesheet" href="./src/css/components.css">
+  <link rel="stylesheet" href="./src/css/style.css">
+</head>
+<body>
+  <!-- Ambient Backdrop pattern -->
+  <div class="ambient-backdrop"></div>
+
+  <div class="app-container">
+    
+    <!-- App Navbar Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand" id="btn-home">
+          <div class="brand-logo-badge">
+            <span>♠</span>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Card Scorekeeper</span>
+            <span class="brand-subtitle">Google Sheets Sync</span>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="status-pill-badge" id="storage-status-pill">
+            <span class="status-dot active"></span>
+            <span id="storage-status-text">Connected</span>
+          </div>
+          <button id="btn-open-settings" class="btn btn-secondary btn-sm" title="Database Settings">
+            ⚙️ <span class="hide-mobile">Settings</span>
+          </button>
+          <button id="btn-header-new-game" class="btn btn-primary btn-sm">
+            <span>＋ New Game</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      
+      <!-- VIEW 1: MY GAMES DASHBOARD -->
+      <section id="view-games" class="view active">
+        
+        <!-- Dashboard Top Control Bar -->
+        <div class="dashboard-bar">
+          <div class="dashboard-title-group">
+            <h1 class="dashboard-title">My Games</h1>
+            <span id="stat-total-games-badge" class="badge badge-status">0 Saved Games</span>
+          </div>
+
+          <div class="dashboard-actions">
+            <button id="btn-dashboard-new-game" class="btn btn-primary">
+              <span>＋ Start New Game</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Saved Games Cards Grid -->
+        <div id="games-grid" class="games-grid">
+          <!-- Dynamic game cards rendered here -->
+        </div>
+
+        <!-- Quick Start Empty State with 1-Click Game Templates -->
+        <div id="games-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-icon-circle">♠</div>
+          <h2 class="empty-title">No Active Games</h2>
+          <p class="empty-description">Create a new card game or select one of the quick templates below to start keeping score.</p>
+          
+          <div class="quick-templates-grid">
+            <button class="template-card btn-quick-template" data-name="Friday Cards" data-players="Rahul, Arjun, Kiran" data-max="100">
+              <span class="template-icon">🃏</span>
+              <div class="template-info">
+                <span class="template-title">Friday Cards</span>
+                <span class="template-meta">3 Players · Max 100</span>
+              </div>
+            </button>
+            <button class="template-card btn-quick-template" data-name="Family Rummy" data-players="Priya, Rahul, Arjun, Ananya" data-max="150">
+              <span class="template-icon">🎴</span>
+              <div class="template-info">
+                <span class="template-title">Family Rummy</span>
+                <span class="template-meta">4 Players · Max 150</span>
+              </div>
+            </button>
+          </div>
+
+          <button id="btn-empty-new-game" class="btn btn-primary btn-lg" style="margin-top: 12px;">
+            ＋ Create Custom Game
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ACTIVE GAME SCOREBOARD -->
+      <section id="view-scoreboard" class="view">
+        
+        <!-- Game Banner Header -->
+        <div class="game-header-card">
+          <div class="game-info">
+            <div class="game-title-row">
+              <button id="btn-back-to-games" class="btn btn-icon btn-sm" title="Back to Dashboard">←</button>
+              <h1 id="active-game-title" class="game-title">Friday Cards</h1>
+            </div>
+            <div class="game-badges">
+              <span id="badge-max-score" class="badge badge-status">🎯 Max Score: 100</span>
+              <span id="badge-player-count" class="badge badge-tied">👥 3 Players</span>
+              <span id="badge-round-count" class="badge badge-tied">📝 0 Rounds</span>
+              <span id="badge-game-status" class="badge badge-lowest">● Active</span>
+            </div>
+          </div>
+          <div class="game-controls">
+            <button id="btn-add-round" class="btn btn-primary">
+              ⚡ ＋ Add Round
+            </button>
+            <button id="btn-game-options" class="btn btn-secondary">
+              Options ⚙️
+            </button>
+          </div>
+        </div>
+
+        <!-- Scoreboard Table Container -->
+        <div id="scoreboard-table-wrapper" class="scoreboard-container">
+          <div class="scoreboard-scroll">
+            <table class="scoreboard-table" id="scoreboard-table">
+              <thead>
+                <tr id="table-header-row">
+                  <th class="col-round">ROUND</th>
+                  <!-- Player columns rendered dynamically -->
+                </tr>
+              </thead>
+              <tbody id="table-body-rows">
+                <!-- Round rows rendered dynamically -->
+              </tbody>
+              <tfoot>
+                <tr id="table-footer-row">
+                  <td class="col-round">TOTAL</td>
+                  <!-- Player total cells rendered dynamically -->
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Scoreboard Empty State -->
+        <div id="scoreboard-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-icon-circle">📝</div>
+          <h3 class="empty-title">No rounds added yet</h3>
+          <p class="empty-description">Start your first round and enter everyone's score.</p>
+          <button id="btn-empty-add-round" class="btn btn-primary btn-lg">⚡ ＋ Add Round 1</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: NEW GAME -->
+  <div id="modal-new-game" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">＋ Create New Game</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <form id="form-new-game">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="input-game-name">Game Name</label>
+            <input type="text" id="input-game-name" class="form-input" placeholder="e.g. Friday Cards" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-max-score">Maximum Score Limit</label>
+            <input type="number" id="input-max-score" class="form-input" placeholder="100" min="1" value="100" required>
+            <div class="form-hint">Lower score is better. Scoreboard alerts when max score is reached.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Players (Minimum 2 required)</label>
+            <div id="new-game-players-list" class="dynamic-players-list">
+              <!-- Player input rows rendered here -->
+            </div>
+            <button type="button" id="btn-add-player-input" class="btn btn-secondary btn-sm" style="margin-top: 10px;">
+              ＋ Add Player
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Start Game →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD ROUND -->
+  <div id="modal-add-round" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-add-round-title">Add Round 1</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <form id="form-add-round">
+        <div class="modal-body">
+          <div id="add-round-players-inputs" class="player-score-input-list">
+            <!-- Player score input fields -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save & Continue →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: EDIT SCORE -->
+  <div id="modal-edit-score" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-edit-score-title">Edit Score</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <form id="form-edit-score">
+        <div class="modal-body">
+          <input type="hidden" id="edit-score-round">
+          <input type="hidden" id="edit-score-player-id">
+          <div class="form-group">
+            <label class="form-label" id="edit-score-label">Score</label>
+            <input type="number" id="input-edit-score" class="form-input" inputmode="numeric" pattern="[0-9]*" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Score</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: CONFIRM DELETE ROUND -->
+  <div id="modal-confirm-delete" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Round</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-round-confirm-msg">Delete Round 1? This will remove all scores from this round.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+        <button type="button" id="btn-confirm-delete-round" class="btn btn-danger">Delete Round</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: GAME OPTIONS -->
+  <div id="modal-game-options" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Game Options</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Add New Player</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="input-add-player-name" class="form-input" placeholder="Player name">
+            <button id="btn-submit-add-player" class="btn btn-secondary">Add</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Players</label>
+          <div id="options-players-list" class="dynamic-players-list">
+            <!-- Render existing players with remove action -->
+          </div>
+        </div>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+          <button id="btn-finish-game" class="btn btn-secondary" style="width: 100%;">
+            🏁 Finish / Archive Game
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: SETTINGS (GOOGLE APPS SCRIPT URL) -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">⚙️ Database Settings</h2>
+        <button class="btn-icon modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+          Connect your Google Sheet database using Google Apps Script Web App URL.
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="input-gas-url">Google Apps Script Web App URL</label>
+          <input type="url" id="input-gas-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+          <div class="form-hint">Leave blank to use Browser LocalStorage (Offline Mode).</div>
+        </div>
+        <div id="settings-status-box" style="margin-top: 12px; padding: 14px; border-radius: var(--radius-md); font-size: 0.88rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+          Status: <strong id="settings-status-label">Local Storage Mode</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btn-test-gas-url" class="btn btn-secondary">Test Connection</button>
+        <button type="button" id="btn-save-gas-url" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript Modules -->
+  <script type="module" src="./src/js/app.js"></script>
+</body>
+</html>

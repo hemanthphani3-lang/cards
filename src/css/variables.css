@@ -1,0 +1,76 @@
+:root {
+  /* Typography */
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+
+  /* Color Palette - Executive Light Theme */
+  --bg-body: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-glass: rgba(255, 255, 255, 0.92);
+  --bg-surface-subtle: #f8fafc;
+  --bg-surface-hover: #e2e8f0;
+  
+  --border-light: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-medium: #cbd5e1;
+  --border-strong: #94a3b8;
+  
+  --text-main: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  
+  /* Primary Indigo & Playing Card Accents */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eeeffe;
+  --primary-text: #4338ca;
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  --primary-glow: rgba(79, 70, 229, 0.22);
+
+  /* Ranking Colors (Lower is Better) */
+  /* 🟢 Lowest (Leader) */
+  --rank-lowest-bg: #ecfdf5;
+  --rank-lowest-surface: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  --rank-lowest-border: #34d399;
+  --rank-lowest-text: #065f46;
+  --rank-lowest-glow: rgba(16, 185, 129, 0.22);
+
+  /* 🟠 Middle */
+  --rank-middle-bg: #fffbe6;
+  --rank-middle-surface: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%);
+  --rank-middle-border: #fbbf24;
+  --rank-middle-text: #92400e;
+  --rank-middle-glow: rgba(245, 158, 11, 0.2);
+
+  /* 🔴 Highest */
+  --rank-highest-bg: #fef2f2;
+  --rank-highest-surface: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  --rank-highest-border: #f87171;
+  --rank-highest-text: #991b1b;
+  --rank-highest-glow: rgba(239, 68, 68, 0.22);
+
+  /* Tied Neutral */
+  --rank-tied-bg: #f8fafc;
+  --rank-tied-surface: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --rank-tied-border: #cbd5e1;
+  --rank-tied-text: #475569;
+
+  /* Tactile Shadows & Card Depth */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 18px 36px -6px rgba(79, 70, 229, 0.18), 0 8px 16px -4px rgba(15, 23, 42, 0.08);
+  --shadow-modal: 0 25px 60px -12px rgba(15, 23, 42, 0.3);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
