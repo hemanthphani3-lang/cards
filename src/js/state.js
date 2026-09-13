@@ -48,6 +48,17 @@ class AppState {
     try {
       const data = await Api.getGame(gameId);
       this.activeGameData = data;
+
+      // Auto-create Round 1 if no rounds exist yet!
+      const roundNumbers = new Set(data.scores.map(s => Number(s.round_number)));
+      if (roundNumbers.size === 0 && data.players && data.players.length >= 2) {
+        const initialScores = data.players.map(p => ({ player_id: p.player_id, score: 0 }));
+        const res = await Api.addRound({ game_id: gameId, scores: initialScores });
+        if (res && res.scores) {
+          this.activeGameData.scores = res.scores;
+        }
+      }
+
       this.recalculate();
       this.notify('activeGameUpdated', this.activeGameData);
     } catch (err) {

@@ -632,3 +632,30 @@
     flex: 1;
   }
 }
+
+/* Excel-Style Spreadsheet Cell Inputs */
+.excel-score-input {
+  width: 100%;
+  max-width: 110px;
+  height: 42px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.excel-score-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  background: #ffffff;
+}
+
+.excel-score-input:hover {
+  border-color: var(--primary);
+}

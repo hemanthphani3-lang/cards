@@ -211,21 +211,29 @@ export const UI = {
       `;
       tr.appendChild(tdRound);
 
-      // Player Score Cells
-      players.forEach(p => {
+      // Player Score Cells (Excel-Style Direct Spreadsheet Inputs)
+      players.forEach((p, pIdx) => {
         const td = document.createElement('td');
-        td.className = 'score-cell';
-        td.dataset.round = rNum;
-        td.dataset.playerId = p.player_id;
-        td.dataset.playerName = p.player_name;
+        td.style.padding = '4px 6px';
 
-        const val = scoreMatrix[rNum] ? scoreMatrix[rNum][p.player_id] : null;
-        td.textContent = (val !== null && val !== undefined) ? val : '-';
+        const val = (scoreMatrix[rNum] && scoreMatrix[rNum][p.player_id] !== undefined && scoreMatrix[rNum][p.player_id] !== null)
+          ? scoreMatrix[rNum][p.player_id] : '';
+
+        td.innerHTML = `
+          <input type="number" 
+                 class="excel-score-input"
+                 data-round="${rNum}"
+                 data-player-id="${p.player_id}"
+                 data-player-index="${pIdx}"
+                 data-round-index="${roundNumbers.indexOf(rNum)}"
+                 value="${val}"
+                 placeholder="0"
+                 inputmode="numeric"
+                 pattern="[0-9]*">
+        `;
 
         tr.appendChild(td);
       });
-
-      tbody.appendChild(tr);
     });
 
     // Render Table Footer (TOTAL Row)

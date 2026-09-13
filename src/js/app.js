@@ -241,30 +241,147 @@ function initEventListeners() {
     }, 200);
   });
 
-  // Score Cell Click (Inline Edit)
-  document.getElementById('scoreboard-table')?.addEventListener('click', (e) => {
-    const cell = e.target.closest('.score-cell');
-    if (cell && cell.dataset.round && cell.dataset.playerId) {
-      const roundNum = cell.dataset.round;
-      const playerId = cell.dataset.playerId;
-      const playerName = cell.dataset.playerName;
-      const currentVal = cell.textContent === '-' ? 0 : cell.textContent;
+  // Direct Excel Spreadsheet Input Handling (No Popups!)
+  let updateDebounceTimer = null;
 
-      document.getElementById('modal-edit-score-title').textContent = `Edit Round ${roundNum} — ${playerName}`;
-      document.getElementById('edit-score-round').value = roundNum;
-      document.getElementById('edit-score-player-id').value = playerId;
+  document.getElementById('scoreboard-table')?.addEventListener('input', (e) => {
+    if (e.target.classList.contains('excel-score-input')) {
+      const input = e.target;
+      const roundNum = Number(input.dataset.round);
+      const playerId = input.dataset.playerId;
+      const raw = input.value.trim();
+      const val = raw === '' ? 0 : Number(raw);
 
-      const input = document.getElementById('input-edit-score');
-      input.value = currentVal;
+      if (!isNaN(val) && state.activeGameData) {
+        // Live update score in memory
+        let s = state.activeGameData.scores.find(
+          sc => Number(sc.round_number) === roundNum && sc.player_id === playerId
+        );
+        if (s) {
+          s.score = val;
+        } else {
+          state.activeGameData.scores.push({
+            score_id: 'temp_' + Date.now(),
+            game_id: state.activeGameId,
+            round_number: roundNum,
+            player_id: playerId,
+            score: val
+          });
+        }
 
-      UI.openModal('modal-edit-score');
-      setTimeout(() => {
-        input.focus();
-        input.select();
-      }, 100);
+        // Live recalculate totals & rankings
+        state.recalculate();
+
+        // Update total row and badges without losing focus
+        const totalsMap = state.totalsMap;
+        const rankings = state.rankings;
+        const game = state.activeGameData.game;
+
+        state.activeGameData.players.forEach(p => {
+          const total = totalsMap[p.player_id] || 0;
+          const rankInfo = rankings[p.player_id] || { colorClass: 'rank-tied', label: 'TIED', icon: '⚖️' };
+          const isMaxExceeded = total >= game.max_score;
+
+          const footerTd = document.querySelector(`#table-footer-row td.${rankInfo.colorClass}, #table-footer-row td:nth-child(${state.activeGameData.players.indexOf(p) + 2})`);
+          if (footerTd) {
+            footerTd.className = rankInfo.colorClass;
+            footerTd.innerHTML = `
+              <div class="total-cell-content">
+                <span class="total-score-val">${total}</span>
+                <span style="font-size: 0.72rem; font-weight: 700; opacity: 0.9;">
+                  ${rankInfo.icon} ${rankInfo.label}
+                </span>
+                ${isMaxExceeded ? `<span class="badge badge-highest" style="margin-top:2px;">⚠️ MAX REACHED</span>` : ''}
+              </div>
+            `;
+          }
+
+          // Update header badges
+          const headerTh = document.querySelector(`#table-header-row th:nth-child(${state.activeGameData.players.indexOf(p) + 2})`);
+          if (headerTh) {
+            const badgeSpan = headerTh.querySelector('.badge');
+            if (badgeSpan) {
+              badgeSpan.className = `badge ${rankInfo.badgeClass}`;
+              badgeSpan.innerHTML = `${rankInfo.icon} ${rankInfo.label}`;
+            }
+          }
+        });
+
+        // Debounced persistent save to API
+        clearTimeout(updateDebounceTimer);
+        updateDebounceTimer = setTimeout(() => {
+          state.updateScore(roundNum, playerId, val);
+        }, 600);
+      }
+    }
+  });
+
+  // Excel Keyboard Navigation (Tab, Enter, Arrow Keys) & Auto-Row Generation
+  document.getElementById('scoreboard-table')?.addEventListener('keydown', async (e) => {
+    if (!e.target.classList.contains('excel-score-input')) return;
+
+    const input = e.target;
+    const rIdx = Number(input.dataset.roundIndex);
+    const pIdx = Number(input.dataset.playerIndex);
+    const totalPlayers = state.activeGameData ? state.activeGameData.players.length : 1;
+
+    let targetR = rIdx;
+    let targetP = pIdx;
+
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      targetR = rIdx + 1;
+    } else if (e.key === 'Tab' || e.key === 'ArrowRight') {
+      if (e.key === 'Tab') e.preventDefault();
+      targetP = pIdx + 1;
+      if (targetP >= totalPlayers) {
+        targetP = 0;
+        targetR = rIdx + 1;
+      }
+    } else if (e.key === 'ArrowLeft') {
+      targetP = pIdx - 1;
+      if (targetP < 0 && rIdx > 0) {
+        targetP = totalPlayers - 1;
+        targetR = rIdx - 1;
+      }
+    } else if (e.key === 'ArrowUp') {
+      targetR = rIdx - 1;
+    } else {
+      return;
     }
 
-    // Delete Round Trigger button
+    // Check if targetR exceeds existing rounds
+    const existingRounds = Array.from(new Set(state.activeGameData.scores.map(s => Number(s.round_number)))).sort((a,b)=>a-b);
+    if (targetR >= existingRounds.length) {
+      // Check if at least half of players in current round have non-zero/non-empty scores
+      const currentRoundNum = existingRounds[rIdx];
+      const filledInCurrentRound = state.activeGameData.scores.filter(
+        s => Number(s.round_number) === currentRoundNum && s.score !== null && s.score !== undefined && String(s.score).trim() !== ''
+      ).length;
+
+      const minHalf = Math.ceil(totalPlayers / 2);
+      if (filledInCurrentRound >= minHalf || targetR > existingRounds.length) {
+        // Auto-create next round row in table!
+        const nextRoundNum = existingRounds.length > 0 ? Math.max(...existingRounds) + 1 : 1;
+        const newScores = state.activeGameData.players.map(p => ({ player_id: p.player_id, score: 0 }));
+        await state.addRound(newScores);
+      }
+    }
+
+    // Focus on target cell input
+    setTimeout(() => {
+      const nextCellInput = document.querySelector(
+        `.excel-score-input[data-round-index="${targetR}"][data-player-index="${targetP}"]`
+      );
+      if (nextCellInput) {
+        nextCellInput.focus();
+        nextCellInput.select();
+      }
+    }, 60);
+  });
+
+  // Table round delete trigger
+  document.getElementById('scoreboard-table')?.addEventListener('click', (e) => {
     const deleteBtn = e.target.closest('.btn-delete-round-trigger');
     if (deleteBtn && deleteBtn.dataset.round) {
       e.stopPropagation();
