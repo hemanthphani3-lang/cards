@@ -234,6 +234,8 @@ export const UI = {
 
         tr.appendChild(td);
       });
+
+      tbody.appendChild(tr);
     });
 
     // Render Table Footer (TOTAL Row)
